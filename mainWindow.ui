@@ -78,22 +78,7 @@
             </item>
             <item>
              <property name="text">
-              <string>NRSV</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>RSV</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>NKJV</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Amplified</string>
+              <string>ASV</string>
              </property>
             </item>
            </widget>

@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'mainWindow.ui'
-#
-# Created by: PyQt5 UI code generator 5.13.0
-#
-# WARNING! All changes made in this file will be lost!
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QObject, pyqtSlot
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QShortcut
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5 import QtCore
+import speech_recognition as sr
+r = sr.Recognizer()
 
 
-class Ui_mainWindow(object):
+class Ui_mainWindow(QObject):
     def setupUi(self, mainWindow):
         mainWindow.setObjectName("mainWindow")
         mainWindow.resize(485, 552)
@@ -44,9 +44,6 @@ class Ui_mainWindow(object):
         self.horizontalLayout.addWidget(self.label)
         self.translation = QtWidgets.QComboBox(self.layoutWidget)
         self.translation.setObjectName("translation")
-        self.translation.addItem("")
-        self.translation.addItem("")
-        self.translation.addItem("")
         self.translation.addItem("")
         self.translation.addItem("")
         self.horizontalLayout.addWidget(self.translation)
@@ -129,6 +126,7 @@ class Ui_mainWindow(object):
         icon1.addPixmap(QtGui.QPixmap("icons8-voice-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Book_voiceInput.setIcon(icon1)
         self.Book_voiceInput.setObjectName("Book_voiceInput")
+        self.Book_voiceInput.clicked.connect(self.voice_book_name)
         self.horizontalLayout_2.addWidget(self.Book_voiceInput)
         self.gridLayout.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
@@ -142,6 +140,7 @@ class Ui_mainWindow(object):
         self.Chapter_VoiceInput = QtWidgets.QPushButton(self.layoutWidget)
         self.Chapter_VoiceInput.setIcon(icon1)
         self.Chapter_VoiceInput.setObjectName("Chapter_VoiceInput")
+        self.Chapter_VoiceInput.clicked.connect(self.voice_chapter_name)
         self.horizontalLayout_3.addWidget(self.Chapter_VoiceInput)
         self.gridLayout.addLayout(self.horizontalLayout_3, 2, 0, 1, 1)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
@@ -155,6 +154,7 @@ class Ui_mainWindow(object):
         self.Verse_VoiceInput = QtWidgets.QPushButton(self.layoutWidget)
         self.Verse_VoiceInput.setIcon(icon1)
         self.Verse_VoiceInput.setObjectName("Verse_VoiceInput")
+        self.Verse_VoiceInput.clicked.connect(self.voice_verse_name)
         self.horizontalLayout_4.addWidget(self.Verse_VoiceInput)
         self.gridLayout.addLayout(self.horizontalLayout_4, 3, 0, 1, 1)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
@@ -170,7 +170,9 @@ class Ui_mainWindow(object):
         icon3.addPixmap(QtGui.QPixmap("icons8-cancel-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Cancel_button.setIcon(icon3)
         self.Cancel_button.setObjectName("Cancel_button")
+        self.Cancel_button.clicked.connect(self.close)
         self.horizontalLayout_5.addWidget(self.Cancel_button)
+
         self.gridLayout.addLayout(self.horizontalLayout_5, 4, 0, 1, 1)
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
         self.groupBox_2 = QtWidgets.QGroupBox(self.layoutWidget)
@@ -239,10 +241,7 @@ class Ui_mainWindow(object):
         self.groupBox.setTitle(_translate("mainWindow", "Audio Bible/Text Searcher"))
         self.label.setText(_translate("mainWindow", "Bible Translation :"))
         self.translation.setItemText(0, _translate("mainWindow", "KJV"))
-        self.translation.setItemText(1, _translate("mainWindow", "NRSV"))
-        self.translation.setItemText(2, _translate("mainWindow", "RSV"))
-        self.translation.setItemText(3, _translate("mainWindow", "NKJV"))
-        self.translation.setItemText(4, _translate("mainWindow", "Amplified"))
+        self.translation.setItemText(1, _translate("mainWindow", "ASV"))
         self.label_2.setText(_translate("mainWindow", "Book:"))
         self.book.setItemText(0, _translate("mainWindow", "Genesis"))
         self.book.setItemText(1, _translate("mainWindow", "Exodus "))
@@ -334,7 +333,38 @@ class Ui_mainWindow(object):
         self.actionCopy.setText(_translate("mainWindow", "Copy"))
         self.actionPaste.setText(_translate("mainWindow", "Paste"))
         self.actionHelp.setText(_translate("mainWindow", "Help"))
-
+    @pyqtSlot()
+    def close(self):
+        buttonReply = QMessageBox.question(None, 'Confirm', "Are you sure you want to close?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if buttonReply == QMessageBox.Yes:
+            sys.exit(1)
+    @pyqtSlot()
+    def voice_book_name(self):
+        print("Book name button")
+    @pyqtSlot()
+    def voice_chapter_name(self):
+        print("Chapter name button")
+        with sr.Microphone() as source:
+            print("Talk")
+            audio_text = r.listen(source)
+            print("Text recieved")
+            try:
+                # print("Text: "+r.recognize_google(audio_text))
+                self.chapter.setText(str(r.recognize_google(audio_text)))
+            except Exception as e:
+                print("Sorry, I did not get that",e)      
+    @pyqtSlot()
+    def voice_verse_name(self):
+        print("Verse name button")
+        with sr.Microphone() as source:
+            print("Talk")
+            audio_text = r.listen(source)
+            print("Text recieved")
+            try:
+                # print("Text: "+r.recognize_google(audio_text))
+                self.verse.setText(str(r.recognize_google(audio_text)))
+            except Exception as e:
+                print("Sorry, I did not get that",e)               
 
 if __name__ == "__main__":
     import sys
