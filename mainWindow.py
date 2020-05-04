@@ -7,7 +7,10 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 import speech_recognition as sr
+import json,os,playsound
+from gtts import gTTS
 r = sr.Recognizer()
+
 
 
 class Ui_mainWindow(QObject):
@@ -164,6 +167,7 @@ class Ui_mainWindow(QObject):
         icon2.addPixmap(QtGui.QPixmap("icons8-checked-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Ok_button.setIcon(icon2)
         self.Ok_button.setObjectName("Ok_button")
+        self.Ok_button.clicked.connect(self.confirm_button)
         self.horizontalLayout_5.addWidget(self.Ok_button)
         self.Cancel_button = QtWidgets.QPushButton(self.layoutWidget)
         icon3 = QtGui.QIcon()
@@ -187,6 +191,7 @@ class Ui_mainWindow(QObject):
         self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_6.setObjectName("horizontalLayout_6")
         self.Read_button = QtWidgets.QPushButton(self.layoutWidget1)
+        self.Read_button.clicked.connect(self.play_audio)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("icons8-circled-play-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Read_button.setIcon(icon4)
@@ -361,10 +366,64 @@ class Ui_mainWindow(QObject):
             audio_text = r.listen(source)
             print("Text recieved")
             try:
-                # print("Text: "+r.recognize_google(audio_text))
+            # print("Text: "+r.recognize_google(audio_text))
                 self.verse.setText(str(r.recognize_google(audio_text)))
             except Exception as e:
-                print("Sorry, I did not get that",e)               
+                print("Sorry, I did not get that",e) 
+    @pyqtSlot()
+    def kjv_parser(self,chapter,verse,book):
+        with open('./assets/bible_data/kjv.json','r') as fp:
+            data = fp.readlines()
+            fp.close()
+        for line in data: 
+            text = json.loads(line)
+            if(text['chapter'] == chapter) and (text['verse'] == verse) and (text['book_name'] == book):
+                final_text = book + ': ' + str(chapter) + ':' + str(verse) + '\n' + text['text']
+                self.output.setText(final_text)
+    @pyqtSlot()
+    def asv_parser(self,chapter,verse,book):
+        with open('./assets/bible_data/asv.json','r') as fp:
+            data = fp.readlines()
+            fp.close()
+        for line in data: 
+            text = json.loads(line)
+            if(text['chapter'] == chapter) and (text['verse'] == verse) and (text['book_name'] == book):
+                final_text = book + ': ' + str(chapter) + ':' + str(verse) + '\n' + text['text']
+                self.output.setText(final_text)            
+    @pyqtSlot()
+    def confirm_button(self):
+        chapter = 1
+        verse = 1
+        book = ''
+        if(self.chapter.text() == ''):
+            QMessageBox.information(None, "Info", "Please enter the chapter",QMessageBox.Ok)
+            if QMessageBox.Accepted: 
+                    self.chapter.setFocus() 
+        elif(self.verse.text() == ''):
+            QMessageBox.information(None, "Info", "Please enter the verse",QMessageBox.Ok)
+            if QMessageBox.Accepted: 
+                    self.verse.setFocus() 
+        try:          
+            chapter = int(self.chapter.text())
+            verse = int(self.verse.text())
+            book = str(self.book.currentText())
+        except Exception as e:
+            print(e)          
+        if (self.translation.currentText() == 'KJV'):
+             print('KJV bible')
+             self.kjv_parser(chapter,verse,book)
+        elif(self.translation.currentText() == 'ASV'):
+             print('ASV Bible')
+             self.asv_parser(chapter,verse,book)
+    @pyqtSlot()
+    def play_audio(self):
+        text_verse = self.output.toPlainText()
+        tts = gTTS(text=text_verse, lang='en')
+        tts.save("./assets/audio/text.mp3")
+        playsound.playsound("./assets/audio/text.mp3")
+        os.remove("./assets/audio/text.mp3") 
+        self.output.clear()
+
 
 if __name__ == "__main__":
     import sys
