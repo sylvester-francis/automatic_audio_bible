@@ -332,28 +332,40 @@ class Ui_mainWindow(QObject):
                 print("Sorry, I did not get that",e) 
     @pyqtSlot()
     def kjv_parser(self,chapter,verse,book):
+        verse_split = verse.split('-')
+        start = int(verse_split[0])
+        end = int(verse_split[-1])
+        new_text = ''
         with open('./assets/bible_data/kjv.json','r') as fp:
             data = fp.readlines()
             fp.close()
-        for line in data: 
-            text = json.loads(line)
-            if(text['chapter'] == chapter) and (text['verse'] == verse) and (text['book_name'] == book):
-                final_text = book + ': ' + str(chapter) + ':' + str(verse) + '\n' + text['text']
-                self.output.setText(final_text)
+        for i in range(start,end+1):   
+            for line in data: 
+                text = json.loads(line)
+                if(text['chapter'] == chapter) and (text['verse'] == i) and (text['book_name'] == book):
+                    new_text = new_text +'\n' + '['+str(i) + ']' + '' + text['text']
+        final_text = book + ': ' + str(chapter) + ':' + str(start)+'-'+str(end) + '\n' + new_text
+        self.output.setText(final_text)
     @pyqtSlot()
     def asv_parser(self,chapter,verse,book):
+        verse_split = verse.split('-')
+        start = int(verse_split[0])
+        end = int(verse_split[-1])
+        new_text = ''
         with open('./assets/bible_data/asv.json','r') as fp:
             data = fp.readlines()
             fp.close()
-        for line in data: 
-            text = json.loads(line)
-            if(text['chapter'] == chapter) and (text['verse'] == verse) and (text['book_name'] == book):
-                final_text = book + ': ' + str(chapter) + ':' + str(verse) + '\n' + text['text']
-                self.output.setText(final_text)            
+        for i in range(start,end+1):   
+            for line in data: 
+                text = json.loads(line)
+                if(text['chapter'] == chapter) and (text['verse'] == i) and (text['book_name'] == book):
+                    new_text = new_text +'\n' + '['+str(i) + ']' + '' + text['text'] 
+        final_text = book + ': ' + str(chapter) + ':' + str(start)+'-'+str(end) + '\n' + new_text
+        self.output.setText(final_text)            
     @pyqtSlot()
     def confirm_button(self):
         chapter = 1
-        verse = 1
+        verse = ''
         book = ''
         if(self.chapter.text() == ''):
             QMessageBox.information(None, "Info", "Please enter the chapter",QMessageBox.Ok)
@@ -365,7 +377,7 @@ class Ui_mainWindow(QObject):
                     self.verse.setFocus() 
         try:          
             chapter = int(self.chapter.text())
-            verse = int(self.verse.text())
+            verse = self.verse.text()
             book = str(self.book.currentText())
         except Exception as e:
             print(e)          
@@ -376,18 +388,17 @@ class Ui_mainWindow(QObject):
              print('ASV Bible')
              self.asv_parser(chapter,verse,book)
     @pyqtSlot()
-    def play_audio(self):
+    def save_audio(self):
         text_verse = self.output.toPlainText()
         tts = gTTS(text=text_verse, lang='en')
         tts.save("./assets/audio/text.mp3")
+                 
+    @pyqtSlot()
+    def play_audio(self):
         playsound.playsound("./assets/audio/text.mp3")
         os.remove("./assets/audio/text.mp3") 
         self.output.clear()
-    @pyqtSlot()
-    def stop_audio(self):
-        if(os.path.exists('./assets/audio/text.mp3')):
-            os.remove("./assets/audio/text.mp3")
-            self.output.clear()
+   
         
 
 if __name__ == "__main__":
