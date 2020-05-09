@@ -7,9 +7,9 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 import speech_recognition as sr
-import json,os,playsound
-from gtts import gTTS
-import winsound
+import json,os
+import win32com.client as winc1
+speak = winc1.Dispatch('SAPI.SpVoice')
 r = sr.Recognizer()
 
 
@@ -387,16 +387,12 @@ class Ui_mainWindow(QObject):
         elif(self.translation.currentText() == 'ASV'):
              print('ASV Bible')
              self.asv_parser(chapter,verse,book)
-    @pyqtSlot()
-    def save_audio(self):
-        text_verse = self.output.toPlainText()
-        tts = gTTS(text=text_verse, lang='en')
-        tts.save("./assets/audio/text.mp3")
+
                  
     @pyqtSlot()
     def play_audio(self):
-        playsound.playsound("./assets/audio/text.mp3")
-        os.remove("./assets/audio/text.mp3") 
+        text_verse = self.output.toPlainText()
+        speak.Speak(text_verse)
         self.output.clear()
    
         
